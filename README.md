@@ -217,14 +217,26 @@ Implementado:
 - Menu global unificado disponivel em todas as paginas protegidas
 - Sidebar fixa no desktop e drawer no mobile
 - Sidebar com estado ativo por rota e design premium dark atualizado
+- Itens da navegacao com icones SVG e feedback visual consistente (hover/focus)
 - Links para Dashboard, Transacoes, Importar, Categorias, Metas, Contas, Cartoes e Perfil
 - Acao de logout pelo proprio menu
+- Breadcrumb dinamico nas telas internas para orientacao de contexto
 
 ## Frontend interno
 
 - Padrão visual das telas internas alinhado ao estilo da landing (glass, gradientes e hierarchy tipografica)
 - Formularios internos com estrutura consistente, feedback de erro e acoes claras (Cancelar/Salvar)
 - Shell autenticado com atmosfera visual (orbs e profundidade) mantendo performance
+- Microanimacoes de entrada (cards, listas e formularios) com transicoes suaves
+- Dashboard refinado para mobile (densidade, contraste e legibilidade)
+
+## Acessibilidade e usabilidade
+
+- Foco visivel padronizado para links, botoes e campos (teclado)
+- Estados `hover`, `focus-visible` e `transition` consistentes nas principais interacoes
+- Suporte a `prefers-reduced-motion` para reduzir animacoes quando solicitado pelo usuario
+- Contraste de textos secundarios reforcado em dashboard, breadcrumb e listagens
+- Login e cadastro com `label` associado (`for/id`) e `autocomplete` apropriado
 
 ## Testes implementados
 
@@ -247,10 +259,11 @@ Implementado:
 - Validacao de acesso admin customizado: staff 200, nao staff 403
 - Landing autenticada redirecionando para dashboard
 - Menu global presente nas paginas protegidas
+- Ajustes de contraste e foco nas listagens de transacoes, contas, categorias e metas
 
 Execucao atual:
 
-- `44 passed`
+- `44 passed` (ultimo ciclo validado)
 
 ## Checklist de Entrega Base
 
@@ -266,6 +279,8 @@ Execucao atual:
 - [x] Paginacao e UX mobile refinada em listagens
 - [x] Importador robusto com validacoes amigaveis
 - [x] Perfil com preferencias de moeda e data
+- [x] Navegacao interna com icones, breadcrumb dinamico e microanimacoes
+- [x] Passe de acessibilidade (foco visivel, reduced motion e contraste)
 - [x] Testes automatizados com pytest
 
 ## Evolucao do sistema
