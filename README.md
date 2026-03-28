@@ -46,6 +46,18 @@ python manage.py runserver
 pytest -q
 ```
 
+6. Popular dados de cliente demo (opcional):
+
+```powershell
+python manage.py seed_demo_client
+```
+
+Parametros opcionais:
+
+```powershell
+python manage.py seed_demo_client --username cliente_demo --email cliente_demo@example.com --password Demo@123456
+```
+
 ## Arquitetura Limpa adotada
 
 Separacao principal por app:
@@ -88,6 +100,7 @@ Regras:
 - `data`
 - `tipo` (`entrada` ou `saida`)
 - `descricao`
+- `import_fingerprint` (hash opcional para deduplicacao de importacao)
 
 ### Goal
 - `user` (FK obrigatoria)
@@ -170,6 +183,24 @@ Validacoes robustas:
 - CSV com validacao de colunas obrigatorias
 - Validacao amigavel por linha (data, valor, tipo e descricao)
 - Erros descritivos com referencia da linha invalida
+- Importacao idempotente: reenvio do mesmo extrato nao duplica movimentacoes
+
+## Backend hardening (passo atual)
+
+- Importacao atomica com deduplicacao por `import_fingerprint`
+- Constraint de unicidade parcial por `user + account + import_fingerprint`
+- Indices adicionais para consultas frequentes em `Category`, `Account`, `Goal` e `Transaction`
+- Otimizacao de selectors de saldo com agregacao em lote (reduz N+1)
+- Testes de autorizacao por objeto (cross-user) e idempotencia de importacao
+
+## Seed de cliente demo
+
+- Comando: `python manage.py seed_demo_client`
+- Objetivo: criar um cliente com dados completos para demonstrar dashboard, listagens, contas/cartao, categorias e metas
+- Comportamento idempotente: pode rodar varias vezes sem duplicar transacoes de seed
+- Credenciais padrao:
+  - Usuario: `cliente_demo`
+  - Senha: `Demo@123456`
 
 ## Modulo Conta Corrente e Cartao
 
@@ -260,10 +291,12 @@ Implementado:
 - Landing autenticada redirecionando para dashboard
 - Menu global presente nas paginas protegidas
 - Ajustes de contraste e foco nas listagens de transacoes, contas, categorias e metas
+- Idempotencia da importacao (segunda importacao do mesmo lote cria `0` novas transacoes)
+- Autorizacao por objeto nas rotas de update/delete (cross-user bloqueado)
 
 Execucao atual:
 
-- `44 passed` (ultimo ciclo validado)
+- `47 passed` (ultimo ciclo validado)
 
 ## Checklist de Entrega Base
 
@@ -281,6 +314,7 @@ Execucao atual:
 - [x] Perfil com preferencias de moeda e data
 - [x] Navegacao interna com icones, breadcrumb dinamico e microanimacoes
 - [x] Passe de acessibilidade (foco visivel, reduced motion e contraste)
+- [x] Backend hardening (idempotencia de importacao, indices e autorizacao por objeto)
 - [x] Testes automatizados com pytest
 
 ## Evolucao do sistema

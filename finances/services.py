@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import io
 from datetime import date
 from decimal import Decimal
@@ -305,6 +306,21 @@ def _extract_rows(file_or_rows) -> list[dict]:
     raise ValidationError("Formato de arquivo nao suportado. Use CSV, OFX ou PDF.")
 
 
+def _build_import_fingerprint(*, user_id: int, account_id: int, row: dict) -> str:
+    # Fingerprint deterministico para evitar duplicacao ao reimportar o mesmo extrato.
+    payload = "|".join(
+        [
+            str(user_id),
+            str(account_id),
+            row["data"].isoformat(),
+            str(row["valor"]),
+            row["tipo"],
+            row["descricao"].strip().lower(),
+        ]
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
 def process_bank_statement_import(file, user, account: Account) -> list[Transaction]:
     if account.user_id != user.id:
         raise ValidationError("Conta invalida para importacao.")
@@ -315,6 +331,18 @@ def process_bank_statement_import(file, user, account: Account) -> list[Transact
 
     with transaction.atomic():
         for row in normalized_rows:
+            fingerprint = _build_import_fingerprint(
+                user_id=user.id,
+                account_id=account.id,
+                row=row,
+            )
+            if Transaction.objects.filter(
+                user=user,
+                account=account,
+                import_fingerprint=fingerprint,
+            ).exists():
+                continue
+
             category = _resolve_category_by_description(
                 user=user,
                 descricao=row["descricao"],
@@ -329,6 +357,7 @@ def process_bank_statement_import(file, user, account: Account) -> list[Transact
                     data=row["data"],
                     tipo=row["tipo"],
                     descricao=row["descricao"],
+                    import_fingerprint=fingerprint,
                 )
             )
 

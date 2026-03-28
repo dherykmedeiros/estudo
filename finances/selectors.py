@@ -3,7 +3,8 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal
 
-from django.db.models import Q, Sum
+from django.db.models import DecimalField, Q, Sum
+from django.db.models.functions import Coalesce
 
 from .models import Account, AccountType, Category, Goal, Transaction, TransactionType
 
@@ -57,15 +58,21 @@ def get_goal_by_id(*, user, goal_id: int):
 
 def get_account_balance(account_id: int) -> Decimal:
     account = Account.objects.get(id=account_id)
-    aggregates = account.transactions.values("tipo").annotate(total=Sum("valor"))
+    aggregates = account.transactions.aggregate(
+        entradas=Coalesce(
+            Sum("valor", filter=Q(tipo=TransactionType.ENTRADA)),
+            Decimal("0.00"),
+            output_field=DecimalField(max_digits=12, decimal_places=2),
+        ),
+        saidas=Coalesce(
+            Sum("valor", filter=Q(tipo=TransactionType.SAIDA)),
+            Decimal("0.00"),
+            output_field=DecimalField(max_digits=12, decimal_places=2),
+        ),
+    )
 
-    entradas = Decimal("0.00")
-    saidas = Decimal("0.00")
-    for row in aggregates:
-        if row["tipo"] == TransactionType.ENTRADA:
-            entradas = row["total"] or Decimal("0.00")
-        else:
-            saidas = row["total"] or Decimal("0.00")
+    entradas = aggregates["entradas"]
+    saidas = aggregates["saidas"]
 
     if account.tipo == AccountType.CARTAO_CREDITO:
         return saidas
@@ -74,8 +81,34 @@ def get_account_balance(account_id: int) -> Decimal:
 
 def get_accounts_with_balances(*, user, tipo=None):
     accounts = list(get_user_accounts(user=user, tipo=tipo))
+    if not accounts:
+        return accounts
+
+    account_ids = [account.id for account in accounts]
+    totals = (
+        Transaction.objects.filter(user=user, account_id__in=account_ids)
+        .values("account_id")
+        .annotate(
+            entradas=Coalesce(
+                Sum("valor", filter=Q(tipo=TransactionType.ENTRADA)),
+                Decimal("0.00"),
+                output_field=DecimalField(max_digits=12, decimal_places=2),
+            ),
+            saidas=Coalesce(
+                Sum("valor", filter=Q(tipo=TransactionType.SAIDA)),
+                Decimal("0.00"),
+                output_field=DecimalField(max_digits=12, decimal_places=2),
+            ),
+        )
+    )
+    totals_by_account = {item["account_id"]: item for item in totals}
+
     for account in accounts:
-        account.saldo_atual = get_account_balance(account.id)
+        aggregate = totals_by_account.get(account.id, {"entradas": Decimal("0.00"), "saidas": Decimal("0.00")})
+        if account.tipo == AccountType.CARTAO_CREDITO:
+            account.saldo_atual = aggregate["saidas"]
+        else:
+            account.saldo_atual = aggregate["entradas"] - aggregate["saidas"]
     return accounts
 
 

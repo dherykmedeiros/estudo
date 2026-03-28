@@ -286,3 +286,78 @@ def test_transaction_import_requires_authentication(client):
     response = client.get(reverse("finances:transaction_import"))
     assert response.status_code == 302
     assert reverse("accounts:login") in response.url
+
+
+@pytest.mark.django_db
+def test_import_service_is_idempotent_for_same_rows_and_account():
+    user = get_user_model().objects.create_user(username="idemuser", password="123456Strong")
+    account = Account.objects.create(user=user, nome="Conta Idem", tipo=AccountType.CONTA_CORRENTE)
+
+    rows = [
+        {"descricao": "UBER TRIP", "valor": "25.50", "data": "2026-03-10", "tipo": "saida"},
+        {"descricao": "SALARIO", "valor": "1000.00", "data": "2026-03-11", "tipo": "entrada"},
+    ]
+
+    first_import = process_bank_statement_import(rows, user, account)
+    second_import = process_bank_statement_import(rows, user, account)
+
+    assert len(first_import) == 2
+    assert len(second_import) == 0
+    assert Transaction.objects.filter(user=user, account=account).count() == 2
+
+
+@pytest.mark.django_db
+def test_cross_user_object_access_is_blocked_for_update_routes(client):
+    user_owner = get_user_model().objects.create_user(username="owner", password="123456Strong")
+    user_other = get_user_model().objects.create_user(username="other", password="123456Strong")
+
+    owner_account = Account.objects.create(user=user_owner, nome="Conta Owner", tipo=AccountType.CONTA_CORRENTE)
+    owner_category = Category.objects.create(user=user_owner, nome="Owner Cat", tipo=TransactionType.SAIDA)
+    owner_goal = Goal.objects.create(user=user_owner, nome="Owner Goal", valor_alvo=Decimal("1000.00"), valor_atual=Decimal("100.00"))
+    owner_tx = Transaction.objects.create(
+        user=user_owner,
+        account=owner_account,
+        category=owner_category,
+        valor=Decimal("15.00"),
+        data=date.today(),
+        tipo=TransactionType.SAIDA,
+        descricao="Owner expense",
+    )
+
+    client.force_login(user_other)
+
+    assert client.get(reverse("finances:transaction_update", args=[owner_tx.id])).status_code == 404
+    assert client.get(reverse("finances:category_update", args=[owner_category.id])).status_code == 404
+    assert client.get(reverse("finances:goal_update", args=[owner_goal.id])).status_code == 404
+    assert client.get(reverse("finances:account_checking_update", args=[owner_account.id])).status_code == 404
+
+
+@pytest.mark.django_db
+def test_cross_user_delete_routes_do_not_delete_foreign_objects(client):
+    user_owner = get_user_model().objects.create_user(username="owner_del", password="123456Strong")
+    user_other = get_user_model().objects.create_user(username="other_del", password="123456Strong")
+
+    owner_account = Account.objects.create(user=user_owner, nome="Conta Owner Del", tipo=AccountType.CONTA_CORRENTE)
+    owner_category = Category.objects.create(user=user_owner, nome="Owner Cat Del", tipo=TransactionType.SAIDA)
+    owner_goal = Goal.objects.create(user=user_owner, nome="Owner Goal Del", valor_alvo=Decimal("500.00"), valor_atual=Decimal("10.00"))
+    owner_tx = Transaction.objects.create(
+        user=user_owner,
+        account=owner_account,
+        category=owner_category,
+        valor=Decimal("9.00"),
+        data=date.today(),
+        tipo=TransactionType.SAIDA,
+        descricao="Owner tx del",
+    )
+
+    client.force_login(user_other)
+
+    client.post(reverse("finances:transaction_delete", args=[owner_tx.id]))
+    client.post(reverse("finances:category_delete", args=[owner_category.id]))
+    client.post(reverse("finances:goal_delete", args=[owner_goal.id]))
+    client.post(reverse("finances:account_checking_delete", args=[owner_account.id]))
+
+    assert Transaction.objects.filter(id=owner_tx.id).exists()
+    assert Category.objects.filter(id=owner_category.id).exists()
+    assert Goal.objects.filter(id=owner_goal.id).exists()
+    assert Account.objects.filter(id=owner_account.id).exists()
