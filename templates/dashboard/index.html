@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load formatting %}
+{% block title %}Dashboard | FinTrack{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-6 sm:py-8 reveal-in">
+    <div class="mb-5 sm:mb-6 reveal-in">
+        <h1 class="text-xl sm:text-2xl font-bold">Dashboard Financeiro</h1>
+        <p class="text-zinc-300">Resumo geral de Entradas e Saidas</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-3 sm:gap-4 mb-5 sm:mb-6 list-stagger">
+        <div class="bg-slate-800/95 rounded-2xl border border-slate-600/40 shadow-xl p-4 sm:p-6">
+            <p class="text-slate-300 text-sm">Saldo Atual</p>
+            <p class="text-2xl sm:text-3xl font-bold">{{ resumo.saldo|format_money:user_preferences.currency|default:'R$ 0,00' }}</p>
+        </div>
+        <div class="bg-slate-800/95 rounded-2xl border border-slate-600/40 shadow-xl p-4 sm:p-6">
+            <p class="text-slate-300 text-sm">Entradas</p>
+            <p class="text-2xl sm:text-3xl font-bold text-green-400">{{ resumo.entradas|format_money:user_preferences.currency|default:'R$ 0,00' }}</p>
+        </div>
+        <div class="bg-slate-800/95 rounded-2xl border border-slate-600/40 shadow-xl p-4 sm:p-6">
+            <p class="text-slate-300 text-sm">Saidas</p>
+            <p class="text-2xl sm:text-3xl font-bold text-rose-400">{{ resumo.saidas|format_money:user_preferences.currency|default:'R$ 0,00' }}</p>
+        </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-3 sm:gap-4 mb-5 sm:mb-6 list-stagger">
+        <div class="bg-slate-800/95 rounded-2xl border border-slate-600/40 shadow-xl p-4 sm:p-6">
+            <h2 class="font-semibold mb-3 text-sm sm:text-base">Saldo por Conta Corrente</h2>
+            <div class="space-y-2 text-sm">
+                {% for conta in contas_correntes %}
+                    <div class="flex justify-between items-center rounded-lg bg-slate-700/20 px-3 py-2">
+                        <span>{{ conta.nome }}</span>
+                        <span class="text-green-400">{{ conta.saldo_atual|format_money:user_preferences.currency }}</span>
+                    </div>
+                {% empty %}
+                    <p class="text-zinc-400">Nenhuma conta corrente cadastrada.</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="bg-slate-800/95 rounded-2xl border border-slate-600/40 shadow-xl p-4 sm:p-6">
+            <h2 class="font-semibold mb-3 text-sm sm:text-base">Fatura atual por Cartao</h2>
+            <div class="space-y-2 text-sm">
+                {% for cartao in cartoes %}
+                    <div class="flex justify-between items-center rounded-lg bg-slate-700/20 px-3 py-2">
+                        <span>{{ cartao.nome }}</span>
+                        <span class="text-red-400">{{ cartao.saldo_atual|format_money:user_preferences.currency }}</span>
+                    </div>
+                {% empty %}
+                    <p class="text-zinc-400">Nenhum cartao cadastrado.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-slate-800/95 rounded-2xl border border-slate-600/40 shadow-xl p-4 sm:p-6 mb-5 sm:mb-6 reveal-in">
+        <h2 class="font-semibold mb-4 text-sm sm:text-base">Progresso das Metas</h2>
+        <div class="space-y-4">
+            {% for meta in metas %}
+                <div>
+                    <div class="flex items-center justify-between text-sm mb-1">
+                        <span>{{ meta.nome }}</span>
+                        <span class="text-zinc-300">{{ meta.percentual_conclusao|floatformat:0 }}%</span>
+                    </div>
+                    <progress value="{{ meta.percentual_conclusao|floatformat:0 }}" max="100" class="w-full h-3 [&::-webkit-progress-bar]:bg-slate-700/60 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-value]:bg-gradient-to-r [&::-webkit-progress-value]:from-violet-500 [&::-webkit-progress-value]:to-emerald-400 [&::-webkit-progress-value]:rounded-full [&::-moz-progress-bar]:bg-emerald-400"></progress>
+                    <div class="flex items-center justify-between text-xs text-zinc-400 mt-1">
+                        <span>Atual: {{ meta.valor_atual|format_money:user_preferences.currency }}</span>
+                        <span>Alvo: {{ meta.valor_alvo|format_money:user_preferences.currency }}</span>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-zinc-400 text-sm">Cadastre metas para visualizar o progresso com barras percentuais.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-3 sm:gap-4 list-stagger">
+        <div class="bg-slate-800/95 rounded-2xl border border-slate-600/40 shadow-xl p-4 sm:p-6 text-sm text-zinc-400" hx-get="{% url 'dashboard:grafico_evolucao' %}" hx-trigger="load">
+            Carregando grafico de evolucao...
+        </div>
+        <div class="bg-slate-800/95 rounded-2xl border border-slate-600/40 shadow-xl p-4 sm:p-6 text-sm text-zinc-400" hx-get="{% url 'dashboard:grafico_saidas' %}" hx-trigger="load">
+            Carregando distribuicao de saidas...
+        </div>
+        <div class="bg-slate-800/95 rounded-2xl border border-slate-600/40 shadow-xl p-4 sm:p-6 text-sm text-zinc-400" hx-get="{% url 'dashboard:grafico_metas' %}" hx-trigger="load">
+            Carregando grafico de metas...
+        </div>
+        <div class="bg-slate-800/95 rounded-2xl border border-slate-600/40 shadow-xl p-4 sm:p-6 text-sm text-zinc-400" hx-get="{% url 'dashboard:grafico_investimentos' %}" hx-trigger="load">
+            Carregando grafico de investimentos...
+        </div>
+    </div>
+</div>
+{% endblock %}

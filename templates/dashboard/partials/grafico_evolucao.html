@@ -1,0 +1,20 @@
+<h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Evolucao dos ultimos 6 meses</h3>
+<div id="{{ chart_id }}" class="h-64 sm:h-80"></div>
+{{ chart_data|json_script:"chart-data-evolucao" }}
+<script>
+(function () {
+    const data = JSON.parse(document.getElementById('chart-data-evolucao').textContent);
+    const options = {
+        chart: { type: 'area', background: 'transparent', toolbar: { show: false } },
+        theme: { mode: 'dark' },
+        colors: ['#4ADE80', '#F87171'],
+        series: data.series,
+        xaxis: { categories: data.labels },
+        stroke: { curve: 'smooth', width: 3 },
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05 } },
+        dataLabels: { enabled: false },
+        grid: { borderColor: '#334155' }
+    };
+    new ApexCharts(document.querySelector('#{{ chart_id }}'), options).render();
+})();
+</script>

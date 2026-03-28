@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Perfil | FinTrack{% endblock %}
+{% block content %}
+<section class="max-w-3xl mx-auto px-4 py-6 sm:py-8 reveal-in">
+    <div class="glass rounded-3xl p-5 sm:p-6 md:p-8 shadow-xl reveal-in">
+        <h1 class="text-2xl sm:text-3xl font-black tracking-tight mb-2">Preferencias</h1>
+        <p class="text-zinc-400 mb-6">Personalize moeda e formato de data para todas as telas.</p>
+        <form method="post" class="space-y-5 list-stagger">
+            {% csrf_token %}
+            <div>
+                <label class="text-sm text-zinc-300">Moeda</label>
+                {{ form.currency }}
+            </div>
+            <div>
+                <label class="text-sm text-zinc-300">Formato de data</label>
+                {{ form.date_format }}
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2 pt-2">
+                <a href="{% url 'dashboard:home' %}" class="w-full text-center rounded-xl py-3 border border-zinc-700 hover:border-zinc-500 transition">Voltar</a>
+                <button type="submit" class="w-full rounded-xl py-3 bg-violet-600 hover:bg-violet-500 transition font-semibold">Salvar preferencias</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

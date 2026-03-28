@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}FinTrack | Controle Financeiro{% endblock %}
+{% block content %}
+<div class="relative overflow-hidden" x-data="{ scrolled: false }" @scroll.window="scrolled = window.pageYOffset > 10">
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-violet-600/30 rounded-full blur-3xl"></div>
+    <div class="absolute top-20 -right-20 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl"></div>
+
+    <nav :class="scrolled ? 'glass' : 'bg-transparent'" class="fixed inset-x-0 top-0 z-40 transition duration-300">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/" class="text-xl font-bold">FinTrack</a>
+            <div class="hidden md:flex items-center gap-6 text-sm text-zinc-300">
+                <a href="#features" class="hover:text-white">Recursos</a>
+                <a href="#cta" class="hover:text-white">Comecar</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="{% url 'accounts:login' %}" class="px-4 py-2 rounded-xl border border-zinc-700 hover:border-zinc-500">Entrar</a>
+                <a href="{% url 'accounts:register' %}" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500">Comecar gratis</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="max-w-7xl mx-auto px-6 pt-36 pb-20 grid lg:grid-cols-2 gap-12 items-center relative z-10">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-700 text-xs mb-6 animate-pulse">
+                JRD Labs | Premium Dark
+            </div>
+            <h1 class="text-4xl md:text-6xl font-black leading-tight mb-5">
+                Seu dinheiro em <span class="gradient-text">Entradas e Saidas</span> com clareza.
+            </h1>
+            <p class="text-zinc-300 text-lg mb-8 max-w-xl">
+                Organize contas correntes, cartoes, metas e investimentos com visual premium e foco em decisao rapida.
+            </p>
+            <div class="flex flex-wrap gap-4 mb-8">
+                <a href="{% url 'accounts:register' %}" class="px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 font-semibold">Criar conta</a>
+                <a href="{% url 'accounts:login' %}" class="px-6 py-3 rounded-xl border border-zinc-700 hover:border-zinc-500">Ja tenho conta</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex -space-x-2">
+                    <div class="w-9 h-9 rounded-full bg-violet-500 border border-zinc-950"></div>
+                    <div class="w-9 h-9 rounded-full bg-emerald-500 border border-zinc-950"></div>
+                    <div class="w-9 h-9 rounded-full bg-sky-500 border border-zinc-950"></div>
+                </div>
+                <span class="text-sm text-zinc-400">Mais de 1.200 usuarios controlando fluxo financeiro.</span>
+            </div>
+        </div>
+
+        <div class="glass rounded-3xl p-6 animate-float">
+            <div class="flex gap-2 mb-5">
+                <span class="w-3 h-3 rounded-full bg-red-400"></span>
+                <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+                <span class="w-3 h-3 rounded-full bg-green-400"></span>
+            </div>
+            <div class="rounded-2xl bg-zinc-900/60 border border-zinc-800 p-5 space-y-4">
+                <p class="text-zinc-400 text-sm">Saldo Total</p>
+                <p class="text-4xl font-bold">R$ 12.480,90</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="rounded-xl p-4 bg-emerald-500/10 border border-emerald-500/30">
+                        <p class="text-xs text-zinc-400">Entradas</p>
+                        <p class="text-xl font-semibold text-emerald-400">R$ 18.230,00</p>
+                    </div>
+                    <div class="rounded-xl p-4 bg-rose-500/10 border border-rose-500/30">
+                        <p class="text-xs text-zinc-400">Saidas</p>
+                        <p class="text-xl font-semibold text-rose-400">R$ 5.749,10</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="max-w-7xl mx-auto px-6 pb-16">
+        <div class="grid md:grid-cols-3 gap-4">
+            <article class="glass rounded-2xl p-6">
+                <h3 class="font-semibold mb-2">Dashboard Inteligente</h3>
+                <p class="text-zinc-400 text-sm">Visualize tendencias com carregamento assincrodo e graficos em tempo real.</p>
+            </article>
+            <article class="glass rounded-2xl p-6">
+                <h3 class="font-semibold mb-2">Auto-categorizacao</h3>
+                <p class="text-zinc-400 text-sm">Importe extratos e deixe o sistema identificar categorias por palavras-chave.</p>
+            </article>
+            <article class="glass rounded-2xl p-6">
+                <h3 class="font-semibold mb-2">Conta + Cartao</h3>
+                <p class="text-zinc-400 text-sm">Acompanhe saldo por conta corrente e fatura de cartoes no mesmo lugar.</p>
+            </article>
+        </div>
+    </section>
+
+    <section id="cta" class="max-w-4xl mx-auto px-6 pb-20">
+        <div class="glass rounded-3xl p-10 text-center">
+            <h2 class="text-3xl font-bold mb-3">Comece hoje no FinTrack</h2>
+            <p class="text-zinc-400 mb-6">Cadastre-se e construa uma visao completa de Entradas e Saidas.</p>
+            <a href="{% url 'accounts:register' %}" class="inline-flex px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-emerald-500 font-semibold">Comecar gratis</a>
+        </div>
+    </section>
+
+    <footer class="border-t border-zinc-800 py-8 text-center text-zinc-500 text-sm">JRD Labs - FinTrack</footer>
+</div>
+{% endblock %}

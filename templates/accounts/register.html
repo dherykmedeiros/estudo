@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Cadastrar | FinTrack{% endblock %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center relative px-4 reveal-in">
+    <div class="absolute -top-20 left-0 w-80 h-80 bg-violet-600/20 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 right-0 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl"></div>
+    <div class="w-full max-w-md p-6 sm:p-8 rounded-2xl glass relative z-10 reveal-in">
+        <h1 class="text-2xl sm:text-3xl font-bold mb-2">Criar conta</h1>
+        <p class="text-zinc-400 mb-6">Comece seu controle financeiro</p>
+        <form method="post" class="space-y-4 list-stagger">
+            {% csrf_token %}
+            <div>
+                <label for="id_username" class="text-sm text-zinc-300">Usuario</label>
+                <input id="id_username" type="text" name="username" autocomplete="username" class="w-full rounded-xl bg-zinc-900/50 border border-zinc-700 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950" required>
+            </div>
+            <div>
+                <label for="id_password1" class="text-sm text-zinc-300">Senha</label>
+                <input id="id_password1" type="password" name="password1" autocomplete="new-password" class="w-full rounded-xl bg-zinc-900/50 border border-zinc-700 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950" required>
+            </div>
+            <div>
+                <label for="id_password2" class="text-sm text-zinc-300">Confirmar senha</label>
+                <input id="id_password2" type="password" name="password2" autocomplete="new-password" class="w-full rounded-xl bg-zinc-900/50 border border-zinc-700 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950" required>
+            </div>
+            <button type="submit" class="w-full rounded-xl py-3 bg-gradient-to-r from-violet-600 to-emerald-500 transition font-semibold">Criar conta</button>
+        </form>
+        <p class="text-sm text-zinc-400 mt-6 text-center">Ja tem conta? <a href="{% url 'accounts:login' %}" class="text-violet-400 hover:text-violet-300">Entrar</a></p>
+    </div>
+</div>
+{% endblock %}

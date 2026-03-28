@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Transacoes Admin | FinTrack{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-4">Transacoes (Admin)</h1>
+    <div class="space-y-2">
+        {% for tx in transactions %}
+            <div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-sm">
+                {{ tx.data }} | {{ tx.descricao }} | {{ tx.get_tipo_display }} | R$ {{ tx.valor }}
+            </div>
+        {% empty %}
+            <p class="text-zinc-400">Nenhuma transacao encontrada.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FinTrack{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        body { background: #09090b; color: #fafafa; }
+        [x-cloak] { display: none !important; }
+        .internal-shell {
+            position: relative;
+            isolation: isolate;
+            min-height: 100vh;
+        }
+        .internal-shell::before,
+        .internal-shell::after {
+            content: "";
+            position: fixed;
+            border-radius: 9999px;
+            filter: blur(70px);
+            pointer-events: none;
+            z-index: -1;
+        }
+        .internal-shell::before {
+            width: 20rem;
+            height: 20rem;
+            top: 7rem;
+            right: 4rem;
+            background: rgba(139, 92, 246, 0.18);
+        }
+        .internal-shell::after {
+            width: 17rem;
+            height: 17rem;
+            bottom: 2rem;
+            left: 4rem;
+            background: rgba(16, 185, 129, 0.14);
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #8b5cf6 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        @keyframes soft-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal-in {
+            animation: soft-in .45s ease both;
+        }
+        .list-stagger > * {
+            opacity: 0;
+            animation: soft-in .45s ease forwards;
+        }
+        .list-stagger > *:nth-child(1) { animation-delay: .03s; }
+        .list-stagger > *:nth-child(2) { animation-delay: .06s; }
+        .list-stagger > *:nth-child(3) { animation-delay: .09s; }
+        .list-stagger > *:nth-child(4) { animation-delay: .12s; }
+        .list-stagger > *:nth-child(5) { animation-delay: .15s; }
+        .list-stagger > *:nth-child(6) { animation-delay: .18s; }
+        .list-stagger > *:nth-child(7) { animation-delay: .21s; }
+        .list-stagger > *:nth-child(8) { animation-delay: .24s; }
+        .list-stagger > *:nth-child(9) { animation-delay: .27s; }
+        .list-stagger > *:nth-child(10) { animation-delay: .30s; }
+
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible,
+        summary:focus-visible {
+            outline: 2px solid #10b981;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-zinc-950 text-zinc-50 min-h-screen" {% if user.is_authenticated %}x-data="{ sidebarOpen: false }"{% endif %}>
+    {% if messages %}
+        <div class="fixed top-4 right-4 z-50 space-y-2">
+            {% for message in messages %}
+                <div class="px-4 py-3 rounded-xl border border-zinc-700 bg-zinc-900/90 text-sm">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if user.is_authenticated %}
+        {% include 'partials/auth_nav.html' %}
+    {% endif %}
+    <main class="{% if user.is_authenticated %}internal-shell pt-16 md:pt-0 md:pl-72{% endif %}">
+        {% if user.is_authenticated %}
+            {% include 'partials/internal_breadcrumb.html' %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
